@@ -1,24 +1,24 @@
-# nitride-nano
+# GaNymede
 
-**Pocket-sized GaN buck/boost converter with USB-C PD input**
+**Open 60 V, 100 A peak three-phase GaN motor controller**
 
 [![License: CERN-OHL-S v2.0](https://img.shields.io/badge/License-CERN--OHL--S%20v2.0-blue.svg)](https://ohwr.org/cern_ohl_s_v2.txt)
 [![KiCad](https://img.shields.io/badge/Made%20with-KiCad-blue)](https://www.kicad.org/)
 
 <table><tr>
-<td><img src="https://raw.githubusercontent.com/NovaPrime18/nitride-nano/main/Pics/Assembled.jpg" width="100%"></td>
-<td><img src="https://raw.githubusercontent.com/NovaPrime18/nitride-nano/main/Pics/nitride-nano-f.jpg" width="100%"></td>
+<td><img src="Pics/board-iso.png" alt="GaNymede isometric 3D render" width="100%"></td>
+<td><img src="Pics/board-top.png" alt="GaNymede top 3D render" width="100%"></td>
 </tr></table>
 
 ---
 
 ## Overview
 
-Nitride-nano is an open-source, high-power-density buck/boost converter crammed into the smallest footprint possible. It targets the same use case as the [Miniware MDP-XP](https://www.miniware.com.cn/product/mdp-xp-digital-power-supply/)  a portable, wide-range programmable power supply. With a focus on **higher power density and a wider voltage range** rather than output ripple performance.
+GaNymede is an open-source, 60 V three-phase motor controller built around six EPC2361 eGaN FETs and three LMG1210 half-bridge drivers. It is sized for a direct-drive hub motor: **50 A phase current continuously, 100 A phase peak for one minute**, with phase-current and phase-voltage sensing on every leg, Hall inputs, two CAN transceivers, and an ESP32-C3 for wireless telemetry.
 
-Built around EPC GaN FETs switching at up to 1 MHz and an LT8390A-based controller topology, it accepts either USB-C Power Delivery or high-voltage DC input and delivers up to 240 W from an XT90 output connector.
+The board is a compact 78 × 65 mm six-layer design, with the bus capacitor bank wrapped around the power stage and the copper pours sized around the full 100 A phase peak. The control side follows the familiar VESC pattern — STM32F405, three Hall inputs, three phase-current channels, CAN — so a VESC-style FOC firmware has a familiar starting point.
 
-The software has been vibe-coded in Rust, using mostly DeepSeek-flash models, and GLM-5.3 / GLM-5.3-flash
+This repository is the hardware design; it does not include firmware.
 
 ---
 
@@ -26,23 +26,33 @@ The software has been vibe-coded in Rust, using mostly DeepSeek-flash models, an
 
 | Parameter | Value |
 |---|---|
-| Input voltage | 12 – 48 V |
-| Output voltage | 0 – 60 V |
-| Input / Output current | 20 A |
-| Max output power | 240 W |
-| Switching frequency | 1 MHz  |
-| Topology | Non-inverting buck/boost |
-| Input | XT90 / USB-C |
-| Output | XT90 |
+| Bus voltage | up to 60 V DC |
+| Phase current | 50 A continuous · 100 A peak (1 min) |
+| Peak output power | ≈ 5.2 kW at 100 A phase peak (m = 1, modelled) |
+| Topology | 3-phase inverter, 6× EPC2361 100 V eGaN |
+| Switching frequency | 20 kHz nominal design point (10–40 kHz analysed) |
+| Gate drive | LMG1210, 5 V, 2.2 Ω |
+| Current sense | 0.25 mΩ per phase, INA240A1 |
+| Control | STM32F405RGT6, 168 MHz, 8 MHz HSE |
+| Wireless | ESP32-C3-WROOM-02 (Wi-Fi / BLE) |
+| CAN | 2× TJA1051TK-3 (STM32 + ESP32), shared bus |
+| Input | XT90 |
+| Phase outputs | 3× 3 mm plated through-holes (U / V / W) |
+| PCB | 78 × 65 mm, 6-layer, 1.6 mm, 1 oz Cu |
+
+Phase currents are amplitudes, not RMS: 100 A peak is 70.7 A RMS.
+
 ---
 
-## USB-C Power Delivery
+## USB-C & wireless
 
-Nitride-nano negotiates full USB-C PD on the input side:
+The USB-C port is a **5 V logic input, not a USB-PD input**:
 
-- **Fixed PDO** — standard 5/9/12/15/20 V profiles
-- **PPS** — 5–21 V programmable (50 mV steps)
-- **AVS / EPR** — 15–48 V extended power range
+- VBUS feeds the +5 V rail through a 0.5 A polyfuse, so the logic side can be powered without the main bus.
+- CC1 / CC2 are pulled down with 5.1 kΩ sink resistors — no PD negotiation.
+- D+ / D− go through 22 Ω series resistors to the ESP32-C3 native USB, giving the radio side a USB serial/JTAG path.
+
+The ESP32-C3 has its own TJA1051 transceiver on the same CAN bus as the STM32, plus EN and BOOT buttons. That lets it act as a Wi-Fi/BLE bridge or an independent second CAN node while the motor loop runs on the STM32.
 
 ---
 
@@ -50,86 +60,103 @@ Nitride-nano negotiates full USB-C PD on the input side:
 
 | Component | Part |
 |---|---|
-| MCU | STM32G474CEUx |
-| Power stage FETs | EPC2367 (eGaN) |
-| Controller | LT8390A / EVAL-LT8390A-AZ topology |
-| Power monitor | INA228 (I²C, 16-bit) |
-| Display | SSD1306 0.96″ OLED |
-| UI | 3-button interface |
+| MCU | STM32F405RGT6 (LQFP-64) |
+| Wireless | ESP32-C3-WROOM-02 |
+| Power stage FETs | 6× EPC2361 (100 V eGaN) |
+| Gate drivers | 3× LMG1210 |
+| Current sense | 3× INA240A1, 0.25 mΩ per phase |
+| CAN transceivers | 2× TJA1051TK-3 |
+| Logic rails | 2× LMR16006X (60 V → 5 V → 3.3 V) |
+| Hall input | JST-PH 6-pin, U/V/W + motor NTC |
+| Expansion | JST-PH 8-pin, SPI / I²C / UART + ADC |
+| Programming | Tag-Connect TC2030 SWD |
+| Input connector | XT90 |
+| Phase outputs | 3× 3 mm plated through-holes |
+
+### Power stage
+
+- Six EPC2361 100 V eGaN FETs, two per phase, switching a 60 V bus. The 100 V rating leaves headroom for turn-off overshoot; the real margin depends on power-loop inductance and is worth a double-pulse check.
+- Each phase uses an LMG1210 driven from 5 V with 2.2 Ω gate resistors. DHL and DLH are strapped high, selecting independent high/low inputs — **dead time is set in firmware**, not by the driver.
+- Bootstrap diodes are BAT46WS; each phase carries a 2.2 nF + 1 Ω snubber.
+- Phase current is measured across 2× 0.5 mΩ 2512 resistors in parallel (0.25 mΩ per phase) into an INA240A1 at a gain of 20.
+- The bus capacitor bank is roughly 1.4 mF (8× 100 µF 80 V, 12× 47 µF 100 V, plus ceramics), protected by an SMAJ60A TVS.
+- Phase outputs land on three 3 mm plated through-holes labelled U, V and W.
+
+### Control & sensing
+
+- STM32F405RGT6 with an 8 MHz crystal and a Tag-Connect SWD header.
+- Three phase-current channels and three phase-voltage channels (56 kΩ / 2.2 kΩ dividers) with switchable RC filter banks, controlled by `EN_C` and `EN_V`.
+- Three NTC inputs (10 kΩ at 25 °C) for FET temperature, plus a motor NTC input on the Hall connector.
+- Three Hall inputs on the 6-pin JST-PH connector; sensor supply is selectable between 3.3 V and 5 V with a solder jumper.
+- Two CAN transceivers: one TJA1051 on the STM32, one on the ESP32-C3, both on the same bus.
+- 8-pin expansion header with +5 V, +3.3 V, GND, SPI, I²C, UART and an extra ADC channel.
+- Status LEDs, ESP32 EN/BOOT buttons, and test points for the 5 V enable and both status LEDs.
 
 ---
 
-## Firmware
+## Firmware & interfaces
 
-- STM32G474 HAL / bare-metal Rust
-- SSD1306 OLED UI with 3-button navigation
-- USB-C PD stack (Fixed / PPS / AVS negotiation) over I²C
-- **Auto-tracking PD** — derives the input rail from the requested output voltage so the LT8390A stays in a clean buck or boost region instead of its lossier 4-switch band
-- INA228 input/output power monitoring and real-time efficiency readout
+Firmware is not included in this repository. The hardware contract for a FOC or six-step implementation is:
 
----
+| Function | STM32F405 pins |
+|---|---|
+| PWM high (TIM1_CH1/2/3) | PA8 / PA9 / PA10 |
+| PWM low (TIM1_CH1N/2N/3N) | PB13 / PB14 / PB15 |
+| Hall U / V / W (TIM8_CH1/2/3) | PC6 / PC7 / PC8 |
+| Phase current U / V / W | PC0 / PC1 / PC2 |
+| Phase voltage U / V / W | PA0 / PA1 / PA2 |
+| FET NTC U / V / W | PA3 / PB0 / PB1 |
+| Motor NTC | PC4 |
+| Bus voltage | PC3 |
+| CAN1 RX / TX | PB8 / PB9 |
+| SWDIO / SWCLK | PA13 / PA14 |
 
-## Thermal Sim
-<table><tr>
-<td><img src="https://raw.githubusercontent.com/NovaPrime18/nitride-nano/main/Pics/Screenshot_20260525_175715.png" width="100%"></td>
-<td><img src="https://raw.githubusercontent.com/NovaPrime18/nitride-nano/main/Pics/Screenshot_20260525_180133.png" width="100%"></td>
-</tr></table>
+Because the LMG1210s run in independent-input mode, the firmware must insert dead time in software. The loss analysis assumes 20 ns; the driver's delay matching allows 10–20 ns, so VESC-default dead times are not appropriate here.
 
-Simulated with Freecad, the enclosure reaches about 38 Degrees C (with a fan) when there's 10W of losses directly going into the heatsink from the GaNFETs. Real world performance is likely better, due to not all 10W leaving the Fets through the top.
-
----
-
-## Testing — Revision 1 (1 MHz)
-
-Bench results from Revision 1 hardware, measured at the operating points below.
-
-| # | Input | Output | Efficiency |
-|---|---|---|---|
-| 1 | 25 V, 7 A — 174.2 W in | 36.6 V, 4.48 A — 164 W out | 94.1 % |
-| 2 | 40 V, 3.61 A — 144.3 W in | 37.1 V, 3.48 A — 129.1 W out | 89.5 % |
-| 3 | 13 V, 9.28 A — 120.6 W in | 36.5 V, 3 A — 109.1 W out | 90.5 % |
-
-**Equipment:** Riden RD6024 bench supply (input) · EA-EL 3160-60 electronic load (output)
-
-**Thermals:** the inductor core ran hottest at ~90 °C — by far the lossiest component on the board. The GaN FETs barely got above 60 °C.
+The ESP32-C3 is independent of the motor loop: native USB, Wi-Fi/BLE, its own CAN transceiver, and EN/BOOT buttons.
 
 ---
 
-## Testing — Revision 2 (2.2 µH, 1 MHz)
+## Thermal & loss budget
 
-Bench results from Revision 2 hardware with the 2.2 µH Coilcraft XAL1010-222MED
-inductor at 1 MHz switching. Efficiency is `Pout / Pin`.
+[`LOSSES.md`](LOSSES.md) contains the full copper, semiconductor and thermal model. These are **modelled** numbers, not measurements:
 
-### USB-C input
+| | 100 A peak (1 min) | 50 A continuous |
+|---|---|---|
+| Total loss | ≈ 29 W | ≈ 7.3 W |
+| Efficiency | ≈ 99.4 % | ≈ 99.7 % |
+| Junction temperature | 45 → 62 °C | 43 °C |
 
-| # | Input | Output | Efficiency |
-|---|---|---|---|
-| 1 | 28 V, 3.957 A — 110.8 W in | 12.4 V, 8.04 A — 99.7 W out | 90.0 % |
-| 2 | 36 V, 2.288 A — 82.4 W in | 12.4 V, 6.09 A — 75.5 W out | 91.7 % |
-| 3 | 20 V, 4.75 A — 95.0 W in | 6.4 V, 12.92 A — 82.7 W out | 87.0 % |
+Assumptions: 60 V bus, 20 kHz switching, 0.25 mΩ shunts, 0.4 mm / 6 W/mK thermal pads, 30 °C ambient — the addendum case in `LOSSES.md`.
 
-### XT90 input
+- The **phase shunts and the 60 V / GND copper** dominate the loss budget — not the six GaNs.
+- The heatsink needs to handle roughly 5–6 W continuous and up to ~20 W by the end of a 100 A minute. A 1.5–2 °C/W natural-convection sink is enough, or bolt the plate to the frame.
+- The thermal pad matters more than the heatsink: a flat, thin, high-conductivity pad is worth tens of degrees at 100 A.
+- The one-minute 100 A rating is limited by thermal mass, not by the heatsink.
 
-| # | Input | Output | Efficiency |
-|---|---|---|---|
-| 1 | 16 V, 10.54 A — 168.6 W in | 52 V, 2.97 A — 154.4 W out | 91.6 % |
-| 2 | 13.81 V, 12.71 A — 175.5 W in | 38.6 V, 4 A — 154.4 W out | 88.0 % |
-| 3 | 16 V, 14.13 A — 226.1 W in | 51.7 V, 4 A — 206.8 W out | 91.5 % |
-| 4 | 16 V, 14.86 A — 237.8 W in | 51.8 V, 4.2 A — 217.6 W out | 91.5 % |
-| 5 | 14 V, 17.2 A — 240.8 W in | 51.7 V, 4.2 A — 217.1 W out | 90.2 % |
-| 6 | 24 V, 9.72 A — 233.3 W in | 52 V, 4.18 A — 217.4 W out | 93.2 % |
-| 7 | 36 V, 6.42 A — 231.1 W in | 52.4 V, 4.18 A — 219.0 W out | 94.8 % |
+---
 
-**Peak efficiency:** 94.8 % at 36 V in → 52.4 V, 4.18 A (219.0 W out). The
-highest input-power point was 240.8 W (14 V, 17.2 A) at 90.2 %; peak output
-power was 219.0 W, up from 164 W on Revision 1.
+## Design files
+
+| Path | Contents |
+|---|---|
+| [`GaNymede/GaNymede.kicad_sch`](GaNymede/GaNymede.kicad_sch) | Root schematic (hierarchical) |
+| [`GaNymede/GaNymede.kicad_pcb`](GaNymede/GaNymede.kicad_pcb) | 6-layer PCB |
+| [`GaNymede/production/`](GaNymede/production) | Gerber zip, BOM, positions, IPC netlist |
+| [`review/`](review) | Schematic SVGs and layout review renders |
+| [`LOSSES.md`](LOSSES.md) | Copper, switching-loss and heatsink analysis |
+
+Open the project with KiCad 10 or later. The fabrication outputs are generated with the KiCad fabrication toolkit.
 
 ---
 
 ## Acknowledgements / Based On
 
-- [**PD240W** by theohg](https://github.com/theohg/PD240W) — USB-C PD input stage reference
-- [**EVAL-LT8390A-AZ** by Analog Devices](https://www.analog.com/en/resources/evaluation-hardware-and-software/evaluation-boards-kits/eval-lt8390a-az.html) — buck/boost power stage reference
+- [**VESC / bldc**](https://github.com/vedderb/bldc) — the open BLDC controller ecosystem and the control-side conventions this board follows.
+- [**EPC2361**](https://epc-co.com/epc/products/gan-fets-and-ics/epc2361) — eGaN FETs and EPC's switching-loss data used in the loss model.
+- [**TI LMG1210**](https://www.ti.com/product/LMG1210), [**INA240**](https://www.ti.com/product/INA240) and [**LMR16006**](https://www.ti.com/product/LMR16006) — gate drive, current sense and logic rails.
+- [**NXP TJA1051**](https://www.nxp.com/products/interfaces/can-transceivers/can-with-flexible-data-rate/tja1051-high-speed-can-transceiver:TJA1051) — CAN transceivers.
+- [**nitride-nano**](https://github.com/NovaPrime18/nitride-nano) — README layout, and the copper-loss analysis method reused in `LOSSES.md`.
 
 ---
 
@@ -145,4 +172,4 @@ See [`LICENSE`](./LICENSE) for the full text, or visit [ohwr.org/cern_ohl_s_v2](
 
 ## Status
 
-> 🚧 Work in progress — Revision 1 and Revision 2 built and power-tested (results above).
+> 🚧 Work in progress — schematic and 6-layer layout are drawn; DRC cleanup and first-article bring-up are still pending. The current and thermal figures above are design targets from the loss model, not measured ratings.
