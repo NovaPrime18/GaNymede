@@ -1,0 +1,265 @@
+(footprint "TH_XT90PB-M"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0 -9.5 0)
+		(layer "F.SilkS")
+		(uuid "5e7b76bc-1e3d-40cd-9015-8d4185cc6331")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "TH_XT90PB-M"
+		(at 0 9.5 0)
+		(layer "F.Fab")
+		(uuid "9c100e3e-f07b-4cd0-bf0b-e69f82b5cfed")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" "https://www.lcsc.com/product-detail/C3040688.html"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "3789ba1f-8f72-4a68-9757-d42b7b46d5ca")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" "Amass XT90PB30-M.G.* - XT90 30 A 2-pin vertical (top-entry) PCB-mount male plug, 21.3 x 10.7 mm body, 20.7 mm standoff, 2 x 6.2 mm through-hole contacts on 11 mm pitch, gold plated, PA66, yellow. LCSC C3040688"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "b20b44af-bb74-41ad-b567-8bb095388d74")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "LCSC Part" "C3040688"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "a38cea75-53b0-43c4-a589-38782187d964")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(attr through_hole)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -4.9 -10.4)
+		(end 5 -10.4)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "b7b65bfa-1ab8-4404-855a-21dce51c56a4")
+	)
+	(fp_line
+		(start -4.9 -8)
+		(end -4.9 -10.4)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "c53070ba-33b6-4230-bbc2-c21d03a939f5")
+	)
+	(fp_line
+		(start -4.9 -8)
+		(end -2.5 -10.4)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "6feb798c-4fe7-4455-9f70-906796ffc39a")
+	)
+	(fp_line
+		(start -4.9 10.4)
+		(end -4.9 -8)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "9ee91a08-7e2e-432f-bdbc-ffd1b609b65e")
+	)
+	(fp_line
+		(start -2.5 -10.4)
+		(end 2.8 -10.4)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "6be73dc1-4919-4284-85f6-dcbc6f1871c0")
+	)
+	(fp_line
+		(start 2.8 -10.4)
+		(end 5 -8.2)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "10b13690-d0c8-434c-8f13-8283a111047e")
+	)
+	(fp_line
+		(start 5 -10.4)
+		(end 5 -8.2)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "5369c325-d878-4802-8bbb-b4c0077f4c11")
+	)
+	(fp_line
+		(start 5 -8.2)
+		(end 5 10.4)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "774ae923-4242-449a-a633-058d2a387c59")
+	)
+	(fp_line
+		(start 5 10.4)
+		(end -4.9 10.4)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "db07e971-0cce-4235-9621-240dbafe63c5")
+	)
+	(fp_circle
+		(center -4.95 -10.4)
+		(end -4.92 -10.4)
+		(stroke
+			(width 0.06)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "14220116-0893-493d-a43b-6073b164f92b")
+	)
+	(fp_line
+		(start -5.6 -10.9)
+		(end 5.6 -10.9)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "1ea0b971-bd3c-4ce9-bfb8-53f5665265e5")
+	)
+	(fp_line
+		(start -5.6 10.9)
+		(end -5.6 -10.9)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "dd263f24-99e4-4c13-8dce-9c131dc3e59f")
+	)
+	(fp_line
+		(start 5.6 -10.9)
+		(end 5.6 10.9)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "c6434ba0-fe01-485d-89fa-554eb051b824")
+	)
+	(fp_line
+		(start 5.6 10.9)
+		(end -5.6 10.9)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "4173becd-371b-4231-a67e-8381c7cd1da0")
+	)
+	(fp_circle
+		(center 0 -5.5)
+		(end 1.42 -5.5)
+		(stroke
+			(width 2.85)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "aaeefda7-a94f-4a51-8022-40faf972aef7")
+	)
+	(fp_circle
+		(center 0 5.5)
+		(end 1.42 5.5)
+		(stroke
+			(width 2.85)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "e1ce8b1c-1b08-44a2-a9c6-74245bc2e7d2")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "4de02795-517b-4fa4-b1c6-a425589677be")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" thru_hole circle
+		(at 0 -5.5 270)
+		(size 8 8)
+		(drill 6.199988)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "6c63b709-f5c2-485a-9c67-2d54fe074804")
+	)
+	(pad "2" thru_hole circle
+		(at 0 5.5 270)
+		(size 8 8)
+		(drill 6.199988)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "34286e24-9571-4432-a8fc-4a3d5091ebaf")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/ThommysParts.3dshapes/TH_XT90PB-M.wrl"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 90)
+		)
+	)
+)
